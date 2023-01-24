@@ -24,14 +24,14 @@ How many python packages/modules are installed?
 
 - 3
 
-note: docker run -it --entrypoint=bash python:3.9
-pip list
+note: ```docker run -it --entrypoint=bash python:3.9```
+```pip list
 Package    Version
 ---------- -------
 pip        22.0.4
 setuptools 58.1.0
 wheel      0.38.4
-
+```
 # Prepare Postgres
 
 Run Postgres and load data as shown in the videos
@@ -58,9 +58,11 @@ Remember that `lpep_pickup_datetime` and `lpep_dropoff_datetime` columns are in 
 
 
 Note:
+```
 select count(*) from green_taxi_trips
 where lpep_pickup_datetime > '2019-01-15 0:0:0' 
 and lpep_dropoff_datetime <'2019-01-16 0:0:0'
+```
 
 ## Question 4. Largest trip for each day
 
@@ -71,11 +73,12 @@ Use the pick up time for your calculations.
 
 
 Note:
-select * from green_taxi_trips
-where trip_distance=(
-	Select max(trip_distance) from green_taxi_trips
-);
-
+```
+select * from green_taxi_trips  
+where trip_distance=(  
+	Select max(trip_distance) from green_taxi_trips  
+);  
+```
 
 ## Question 5. The number of passengers
 
@@ -88,12 +91,14 @@ In 2019-01-01 how many trips had 2 and 3 passengers?
 
 
 Note:
+```
 select count(*) as total_trip_per_p from green_taxi_trips
 where lpep_pickup_datetime > '2019-01-01 00:00:00' and
 	lpep_pickup_datetime < '2019-01-02 00:00:00'
 group by passenger_count
+```
 
-I got different results:
+I got different results:  
 | n. of passengers     | total trips|
 | ----------- | ----------- |
 | 2   |12415       |
@@ -111,6 +116,7 @@ Note: it's not a typo, it's `tip` , not `trip`
 - Long Island City/Queens Plaza
 
 Note:
+```
 SELECT * FROM (
 SELECT tip_amount, 
     zpu."Zone" AS pick_up_loc,
@@ -122,6 +128,7 @@ left join taxi_zone_lookup zdo
 ON g."DOLocationID" = zdo."LocationID") a
 WHERE a."pick_up_loc" = 'Astoria'
 ORDER BY tip_amount DESC;
+```
 
 ## Submitting the solutions
 
