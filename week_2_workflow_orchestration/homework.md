@@ -12,7 +12,62 @@ How many rows does that dataset have?
 * 447,770
 
 Note:  
-df = pd.read_csv(dataset_url, parse_dates = date_cols)
+Code
+```python
+@task(log_prints=True, retries=3)
+def fetch(dataset_url: str, color) -> pd.DataFrame:
+    """Read data from web into pandas DataFrame"""
+    if color == "green":
+        date_cols = ["lpep_pickup_datetime", "lpep_dropoff_datetime"]
+    elif color == "yellow":
+        date_cols = ["tpep_pickup_datetime", "tpep_dropoff_datetime"]
+
+    df = pd.read_csv(dataset_url, parse_dates = date_cols)
+    #print(df.dtypes)
+    #print(df.head(2))
+    print(f"rows: {len(df)}")
+    return df
+
+@task(log_prints=True, retries=3)
+def write_local(df: pd.DataFrame, color: str, dataset_file: str) -> Path:
+    """Write DataFrame out locally as parquet file"""
+    path = Path(f"data/{color}/{dataset_file}.parquet")
+    path.parent.mkdir(parents=True, exist_ok=True)  
+    df.to_parquet(path, compression="gzip")
+
+    return path
+
+@task(log_prints=True, retries=3)
+def write_gcs(path: Path) -> None:
+    """Upload local parquet file to GCS"""
+    gcp_bucket_block = GcsBucket.load("dezoom-gcs")
+    gcp_bucket_block.upload_from_path(
+        from_path=path,
+        to_path=path
+    )
+    return
+
+
+
+@flow()
+def etl_web_to_gcs() -> None:
+    """The main ETL function
+    """
+    color = "green"
+    year = 2019
+    month = 4
+    dataset_file = f"{color}_tripdata_{year}-{month:02}"
+    dataset_url = f"https://github.com/DataTalksClub/nyc-tlc-data/releases/download/{color}/{dataset_file}.csv.gz"
+
+    df = fetch(dataset_url, color)
+    path = write_local(df, color, dataset_file)
+    write_gcs(path)
+
+
+if __name__ == "__main__":
+    etl_web_to_gcs()
+```
+Results: 
 rows: 447770
 
 ## Question 2. Scheduling with Cron
@@ -26,8 +81,18 @@ Using the flow in `etl_web_to_gcs.py`, create a deployment to run on the first o
 - `5 * 1 0 *`
 - `* * 5 1 0`
 
-
-
+Note:
+```
+# ┌───────────── minute (0 - 59)
+# │ ┌───────────── hour (0 - 23)
+# │ │ ┌───────────── day of the month (1 - 31)
+# │ │ │ ┌───────────── month (1 - 12)
+# │ │ │ │ ┌───────────── day of the week (0 - 6) (Sunday to Saturday;
+# │ │ │ │ │                                   7 is also Sunday on some systems)
+# │ │ │ │ │
+# │ │ │ │ │
+# * * * * * <command to execute>
+```
 
 ## Question 3. Loading data to BigQuery 
 
@@ -50,6 +115,7 @@ Make sure you have the parquet data files for Yellow taxi data for Feb. 2019 and
 
 
 Code:
+```python
 @task(log_prints=True, retries=3) # , cache_key_fn=task_input_hash, cache_expiration=timedelta(days=1)
 def extract_from_gcs(color: str, year: int, month: int) -> Path:
     """Download trip data from GCS"""
@@ -89,7 +155,7 @@ if __name__ == "__main__":
     year = 2019
     months = [2, 3]
     etl_gcs_to_bq(year, months, color)
-
+```
 
 
 ## Question 4. Github Storage Block
