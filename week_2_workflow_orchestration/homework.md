@@ -174,6 +174,29 @@ How many rows were processed by the script?
 - 190,225
 
 
+Code:
+```python
+from prefect.filesystems import GitHub
+from prefect.deployments import Deployment
+from parameterized_flow import etl_parent_flow
+
+github_block = GitHub.load("github-block")
+
+github_block.get_directory(
+    from_path="week_2_workflow_orchestration/flow/deployment/parameterized_flow.py",
+)
+
+github_dep = Deployment.build_from_flow(
+    flow=etl_parent_flow,
+    name="github-flow",
+    #infrastructure=github_block
+)
+
+if __name__ == "__main__":
+    github_dep.apply()
+
+```
+
 
 ## Question 5. Email notifications
 
@@ -197,8 +220,24 @@ Prefect Secret blocks provide secure, encrypted storage in the database and obfu
 
 - 5
 - 6
-- 8
+- 8  * 
 - 10
+
+Note: 
+```
+The output of UI in next page:
+aste this snippet into your flows to use this block.
+
+from prefect.blocks.system import Secret
+
+secret_block = Secret.load("secret-zoom")
+
+# Access the stored secret
+secret_block.get()
+
+Value
+********
+```
 
 
 ## Submitting the solutions
