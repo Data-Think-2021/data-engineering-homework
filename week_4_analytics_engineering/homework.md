@@ -14,6 +14,10 @@ only if you want to.
 
 > **Note**: if your answer doesn't match exactly, select the closest option 
 
+
+**Please find my repo for dbt models under [the link](https://github.com/Data-Think-2021/dezoomcamp_dbt)**
+
+
 ### Question 1: 
 
 **What is the count of records in the model fact_trips after running all models with the test run variable disabled and filtering for 2019 and 2020 data only (pickup datetime)** 
