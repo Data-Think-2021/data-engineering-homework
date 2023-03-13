@@ -26,7 +26,9 @@ Note:
 - Consumer Group Id
 - Ack All *
 
-
+Note:
+Topic Replication on different codes. So that one node goes down, we still have other replicated topics.   
+Ack all: leader + follower’s
 
 ### Question 3: 
 
@@ -37,6 +39,8 @@ Note:
 - Consumer Group Id 
 - Ack All
 
+Note: 
+Partitioning topics so that multiple consumers can consume them in parallel. 
 
 ### Question 4: 
 
